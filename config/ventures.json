@@ -1,0 +1,22 @@
+[
+  {
+    "id": "real-estate",
+    "name": "Real Estate",
+    "description": "AI-powered tools for real estate investors, agents, and property managers. Includes rental analysis, listing optimization, and market intelligence."
+  },
+  {
+    "id": "finance",
+    "name": "Finance",
+    "description": "Fintech products covering payments, personal finance, and financial planning tools."
+  },
+  {
+    "id": "hospitality",
+    "name": "Hospitality",
+    "description": "Solutions for hotels, restaurants, short-term rentals, and guest experience management."
+  },
+  {
+    "id": "general",
+    "name": "General / Studio Ops",
+    "description": "Internal studio operations, cross-venture initiatives, or messages that don't map to a specific venture."
+  }
+]

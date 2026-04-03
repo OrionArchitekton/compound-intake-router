@@ -1,0 +1,20 @@
+{
+  "name": "compound-intake-router",
+  "version": "1.0.0",
+  "description": "Webhook-driven intake pipeline that classifies, routes, and logs inbound messages across a venture studio.",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "demo": "bash examples/send-all.sh",
+    "view-log": "node scripts/view-log.js"
+  },
+  "keywords": [],
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.82.0",
+    "better-sqlite3": "^12.8.0",
+    "dotenv": "^17.4.0",
+    "express": "^5.2.1"
+  }
+}

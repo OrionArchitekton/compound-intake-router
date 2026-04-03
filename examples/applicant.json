@@ -1,0 +1,9 @@
+{
+  "sender": {
+    "name": "Lena Park",
+    "email": "lena.park.dev@gmail.com"
+  },
+  "subject": "AI Systems Builder application — built you a demo",
+  "body": "Hi! I'm Lena, a full-stack developer based in San Diego. I saw your AI Systems Builder posting and wanted to apply. I've been building AI agents and automation tools independently for the past year — mostly Node.js, Python, and various LLM APIs. I put together a small project as my application: a webhook-based lead scoring pipeline that enriches company data and routes qualified leads to Slack. Repo is at github.com/lenapark/lead-scorer. I'm excited about the venture studio model because I love building across different problem domains. Happy to chat anytime.",
+  "source": "email"
+}

@@ -1,0 +1,10 @@
+{
+  "sender": {
+    "name": "Priya Sharma",
+    "email": "priya@guestvault.io",
+    "company": "GuestVault"
+  },
+  "subject": "Integration partnership — hospitality guest data",
+  "body": "Hi there, I'm the CTO at GuestVault. We provide a guest identity and preferences platform used by about 200 boutique hotels across the US. I noticed Compound Ventures is building in the hospitality space and I think there could be a natural integration between our guest data layer and your AI-powered guest experience tools. We already have APIs for guest profile lookup, stay history, and preference management. Would love to set up a 30-minute call to explore. We're based in Austin but can do this async if easier.",
+  "source": "email"
+}

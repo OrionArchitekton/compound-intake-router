@@ -1,0 +1,9 @@
+{
+  "sender": {
+    "name": "Jason Trask",
+    "email": "jason.trask@gmail.com"
+  },
+  "subject": "Can't reset my password",
+  "body": "I signed up for the waitlist on your productivity app last week and got a confirmation email. I tried logging in today but it says my password is wrong. I clicked 'forgot password' but never got the reset email. I checked spam. Can someone help? I really want to try the app before the beta closes. My account email is this one (jason.trask@gmail.com).",
+  "source": "email"
+}

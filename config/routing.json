@@ -1,0 +1,31 @@
+{
+  "routes": {
+    "lead": {
+      "real-estate": "#re-inbound",
+      "finance": "#fin-inbound",
+      "hospitality": "#hosp-inbound",
+      "general": "#general-leads"
+    },
+    "partnership": {
+      "default": "#partnerships"
+    },
+    "support": {
+      "default": "#support-triage"
+    },
+    "applicant": {
+      "default": "#hiring"
+    },
+    "spam": {
+      "action": "log-only"
+    },
+    "unknown": {
+      "default": "#intake-review"
+    }
+  },
+  "fallbackChannel": "#intake-review",
+  "urgencyPrefix": {
+    "high": "!!!",
+    "medium": ">>",
+    "low": "--"
+  }
+}
