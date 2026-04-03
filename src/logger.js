@@ -23,11 +23,15 @@ export function initDb() {
       subject TEXT,
       body_preview TEXT,
       type TEXT,
+      type_confidence REAL,
       urgency TEXT,
       venture TEXT,
+      venture_confidence REAL,
+      spam_score REAL,
       suggested_action TEXT,
       route_destination TEXT,
       route_success INTEGER,
+      delivery_mode TEXT,
       processing_ms INTEGER,
       raw_payload TEXT,
       classification_raw TEXT,
@@ -41,13 +45,15 @@ export function initDb() {
 const INSERT = `
   INSERT INTO intakes (
     id, received_at, processed_at, sender_email, sender_domain,
-    subject, body_preview, type, urgency, venture, suggested_action,
-    route_destination, route_success, processing_ms,
+    subject, body_preview, type, type_confidence, urgency, venture,
+    venture_confidence, spam_score, suggested_action,
+    route_destination, route_success, delivery_mode, processing_ms,
     raw_payload, classification_raw, pipeline_status
   ) VALUES (
     @id, @received_at, @processed_at, @sender_email, @sender_domain,
-    @subject, @body_preview, @type, @urgency, @venture, @suggested_action,
-    @route_destination, @route_success, @processing_ms,
+    @subject, @body_preview, @type, @type_confidence, @urgency, @venture,
+    @venture_confidence, @spam_score, @suggested_action,
+    @route_destination, @route_success, @delivery_mode, @processing_ms,
     @raw_payload, @classification_raw, @pipeline_status
   )
 `;

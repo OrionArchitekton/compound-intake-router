@@ -75,6 +75,6 @@ export async function classify(normalized) {
     };
   } catch (err) {
     console.error(`[classifier] failed: ${err.message}`);
-    return { ...FALLBACK, _error: err.message };
+    throw err;
   }
 }
