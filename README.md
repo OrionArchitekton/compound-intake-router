@@ -127,7 +127,7 @@ npm run view-log    # pretty-print the 20 most recent records
 
 ## Operational Notes
 
-- **Enrichment makes a live outbound request.** For each accepted message, the enricher issues an `HTTP GET https://<sender-domain>` with a 3-second timeout and a `CompoundIntakeRouter/1.0` User-Agent. The target domain is derived from sender-supplied input — front this with appropriate egress controls in production.
+- **Enrichment makes a live outbound request.** For each accepted message, the enricher issues an HTTP GET to the sender domain with a 3-second timeout and a custom User-Agent. Since the target domain is derived from sender-supplied input, front this with appropriate egress controls and consider response size limits to prevent memory exhaustion (OOM) from large payloads.
 - **`/intake` is unauthenticated by design.** There is no auth on `POST /intake` or `GET /health`. For any non-local deployment, put it behind a gateway, shared secret, or signature check.
 
 ## Stack
