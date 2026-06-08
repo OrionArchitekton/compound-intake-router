@@ -29,7 +29,7 @@ npm start               # starts on :3747 (override with PORT)
 npm run demo            # send 5 sample payloads (alias for: bash examples/send-all.sh)
 ```
 
-Requires Node.js 18+ for the built-in `fetch` used by enrichment and Slack delivery (developed and tested on Node 24).
+Requires Node.js 21+ for stable built-in fetch without experimental warnings (developed and tested on Node 24; Node 18+ is supported but may emit experimental warnings).
 
 ## Example Output
 
