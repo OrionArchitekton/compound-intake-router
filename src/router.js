@@ -1,6 +1,8 @@
 import { loadConfig } from './config.js';
 import { deliver } from './delivery.js';
 
+const oneLine = value => String(value ?? '').replace(/[\r\n\u2028\u2029]+/g, ' ');
+
 export function resolveDestination(classification, config = loadConfig()) {
   if (classification.type === 'spam') return null;
   if (classification.type === 'unknown') return config.routing.fallbackChannel;
@@ -18,10 +20,10 @@ export async function route(normalized, classification, enrichment,
   const mode = env.DELIVERY_MODE || 'console';
   const text = [
     `[${classification.type.toUpperCase()}] ${classification.urgency.toUpperCase()} - ${classification.venture}`,
-    `From: ${normalized.sender.name} <${normalized.sender.email}>`,
-    `Subject: ${normalized.subject || '(no subject)'}`,
-    `Reasoning: ${classification.reasoning}`, `Action: ${classification.suggestedAction}`,
-    `Route: ${destination}`, `Intake: ${normalized.id}`,
+    `From: ${oneLine(normalized.sender.name)} <${oneLine(normalized.sender.email)}>`,
+    `Subject: ${oneLine(normalized.subject) || '(no subject)'}`,
+    `Reasoning: ${oneLine(classification.reasoning)}`, `Action: ${oneLine(classification.suggestedAction)}`,
+    `Route: ${oneLine(destination)}`, `Intake: ${oneLine(normalized.id)}`,
   ].join('\n');
   try {
     await deliver({ id: normalized.id, destination, sender: normalized.sender,

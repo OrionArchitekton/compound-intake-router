@@ -71,7 +71,7 @@ Destinations are operator settings, never lead/model output. Remote URLs require
 
 ## Privacy and limits
 
-Accepted raw payloads and classification results persist in `data/intakes.db`. Treat the DB, backups and console output as private customer data; the app does not encrypt them. Claude receives sender context, subject and about 3,000 body characters. [Anthropic's retention terms](https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data) apply. Alert providers also receive alert content.
+Accepted raw payloads and classification results persist in `data/intakes.db` by default; `INTAKE_DB_PATH` overrides that location (including the hosted disk path). Treat the DB, backups and console output as private customer data; the app does not encrypt them. Claude receives sender context, subject and about 3,000 body characters. [Anthropic's retention terms](https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data) apply. Alert providers also receive alert content.
 
 Sender websites are never fetched. The API retains its domain/website fields for compatibility, with website enrichment always skipped. A legacy `ENABLE_ENRICHMENT=true` setting refuses startup; remove it before upgrading. Loopback is the default bind; non-local binding requires `INTAKE_TOKEN`. Add HTTPS, gateway rate/body limits, provider budget limits and monitoring before internet exposure. No built-in usage quota or customer billing.
 

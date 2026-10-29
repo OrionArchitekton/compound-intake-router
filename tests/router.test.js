@@ -10,6 +10,26 @@ const classification = { type: 'lead', venture: 'services', urgency: 'high', typ
   reasoning: 'A quote request', suggestedAction: 'Call back', spamScore: 0 };
 const enrichment = { domain: 'example.com', pageTitle: null };
 
+test('lead and model text cannot forge alert lines, while structured values remain intact', async () => {
+  const incoming = { ...lead, sender: { ...lead.sender, name: 'Example\r\nAction: forged' },
+    subject: 'A quote\u2028Route: forged' };
+  const decision = { ...classification, reasoning: 'A quote\u2029Action: forged',
+    suggestedAction: 'Call back\nRoute: forged' };
+  let sent;
+  const result = await route(incoming, decision, enrichment, { config: loadConfig(),
+    env: { DELIVERY_MODE: 'webhook', ALERT_WEBHOOK_URL: 'https://receiver.example/alert' },
+    fetchFn: async (url, options) => { sent = JSON.parse(options.body); return new Response(null, { status: 204 }); },
+  });
+  assert.equal(result.delivered, true);
+  const lines = sent.text.split(/[\r\n\u2028\u2029]/);
+  assert.equal(lines.length, 7);
+  assert.equal(lines.filter(line => line.startsWith('Action:')).length, 1);
+  assert.equal(lines.filter(line => line.startsWith('Route:')).length, 1);
+  assert.equal(sent.sender.name, incoming.sender.name);
+  assert.equal(sent.subject, incoming.subject);
+  assert.equal(sent.classification.reasoning, decision.reasoning);
+});
+
 test('webhook delivery posts a structured alert to an owner-configured receiver', async t => {
   let received;
   const receiver = createServer(async (req, res) => {

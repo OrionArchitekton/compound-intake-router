@@ -12,6 +12,7 @@ COPY package.json package-lock.json LICENSE ./
 COPY src ./src
 COPY config ./config
 COPY scripts ./scripts
+COPY examples ./examples
 RUN mkdir -p /app/data && chown node:node /app/data
 USER node
 EXPOSE 3747
