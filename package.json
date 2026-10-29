@@ -9,7 +9,7 @@
     "demo": "node scripts/demo.js",
     "view-log": "node scripts/view-log.js",
     "test": "node --test",
-    "demo:live": "bash examples/send-all.sh"
+    "demo:live": "node scripts/live-demo.js"
   },
   "keywords": [],
   "license": "MIT",
