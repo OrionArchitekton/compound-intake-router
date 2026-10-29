@@ -1,0 +1,13 @@
+services:
+  intake:
+    build: .
+    ports:
+      - "127.0.0.1:3747:3747"
+    env_file: .env
+    environment:
+      HOST: 0.0.0.0
+      INTAKE_TOKEN: ${INTAKE_TOKEN:?Set a private inbound token in .env}
+    volumes:
+      - intake-data:/app/data
+volumes:
+  intake-data:

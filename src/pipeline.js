@@ -4,18 +4,22 @@ import { enrich } from './enricher.js';
 import { route } from './router.js';
 import { logIntake } from './logger.js';
 import { timer } from './utils.js';
+import { loadConfig } from './config.js';
 
 async function runStage(name, fn) {
   try {
     const result = await fn();
     return { status: 'ok', result };
   } catch (err) {
-    console.error(`[pipeline:${name}] ${err.message}`);
-    return { status: 'failed', error: err.message, result: null };
+    console.error(`[pipeline:${name}] Stage failed; inspect the audit status`);
+    return { status: 'failed', result: null };
   }
 }
 
-export async function processIntake(rawPayload) {
+export async function processIntake(rawPayload, {
+  config = loadConfig(), classifyFn = classify, routeFn = route, logFn = logIntake,
+  enrichEnabled = process.env.ENABLE_ENRICHMENT === 'true',
+} = {}) {
   const elapsed = timer();
 
   // 1. Normalize
@@ -32,7 +36,7 @@ export async function processIntake(rawPayload) {
   const pipeline = { normalize: 'ok' };
 
   // 2. Classify
-  const classifyResult = await runStage('classify', () => classify(payload));
+  const classifyResult = await runStage('classify', () => classifyFn(payload, { config }));
   let classification;
   if (classifyResult.status === 'ok') {
     pipeline.classify = 'ok';
@@ -49,21 +53,26 @@ export async function processIntake(rawPayload) {
   }
 
   // 3. Enrich
-  const enrichResult = await runStage('enrich', () => enrich(payload.sender));
-  pipeline.enrich = enrichResult.status;
+  const enrichResult = enrichEnabled
+    ? await runStage('enrich', () => enrich(payload.sender))
+    : { status: 'skipped', result: { domain: payload.sender.domain, hasWebsite: false, pageTitle: null } };
+  pipeline.enrich = enrichResult.result?.status === 'failed' ? 'failed' : enrichResult.status;
   const enrichment = enrichResult.result || {
     domain: payload.sender.domain, hasWebsite: false, pageTitle: null, status: 'failed',
   };
 
   // 4. Route
-  const routeResult = await runStage('route', () => route(payload, classification, enrichment));
-  pipeline.route = routeResult.status;
-  const routing = routeResult.result || { destination: '#intake-review', delivered: false, mode: 'failed' };
+  const routeResult = await runStage('route', () => routeFn(payload, classification, enrichment, { config }));
+  const routing = routeResult.result || {
+    destination: config.routing.fallbackChannel, delivered: false, mode: 'failed',
+  };
+  pipeline.route = routing.mode === 'filtered' ? 'filtered' : routing.delivered ? 'ok' : 'failed';
 
   // 5. Log
   const processingMs = elapsed();
+  pipeline.log = 'ok';
   const logResult = await runStage('log', () => {
-    logIntake({
+    logFn({
       id: payload.id,
       received_at: payload.receivedAt,
       processed_at: new Date().toISOString(),

@@ -1,0 +1,82 @@
+{
+  "description": "A venture studio with real-estate, finance and hospitality teams",
+  "types": [
+    {
+      "id": "lead",
+      "description": "A new customer asking for a quote or appointment"
+    },
+    {
+      "id": "support",
+      "description": "An existing customer needs help"
+    },
+    {
+      "id": "partnership",
+      "description": "A supplier or business collaboration"
+    },
+    {
+      "id": "applicant",
+      "description": "A person applying for work"
+    },
+    {
+      "id": "spam",
+      "description": "Unsolicited bulk or irrelevant messages"
+    },
+    {
+      "id": "unknown",
+      "description": "Unclear message requiring manual review"
+    }
+  ],
+  "ventures": [
+    {
+      "id": "real-estate",
+      "name": "Real Estate",
+      "description": "AI-powered tools for real estate investors, agents, and property managers. Includes rental analysis, listing optimization, and market intelligence."
+    },
+    {
+      "id": "finance",
+      "name": "Finance",
+      "description": "Fintech products covering payments, personal finance, and financial planning tools."
+    },
+    {
+      "id": "hospitality",
+      "name": "Hospitality",
+      "description": "Solutions for hotels, restaurants, short-term rentals, and guest experience management."
+    },
+    {
+      "id": "general",
+      "name": "General / Studio Ops",
+      "description": "Internal studio operations, cross-venture initiatives, or messages that don't map to a specific venture."
+    }
+  ],
+  "routing": {
+    "routes": {
+      "lead": {
+        "real-estate": "#re-inbound",
+        "finance": "#fin-inbound",
+        "hospitality": "#hosp-inbound",
+        "general": "#general-leads"
+      },
+      "partnership": {
+        "default": "#partnerships"
+      },
+      "support": {
+        "default": "#support-triage"
+      },
+      "applicant": {
+        "default": "#hiring"
+      },
+      "spam": {
+        "action": "log-only"
+      },
+      "unknown": {
+        "default": "#intake-review"
+      }
+    },
+    "fallbackChannel": "#intake-review",
+    "urgencyPrefix": {
+      "high": "!!!",
+      "medium": ">>",
+      "low": "--"
+    }
+  }
+}

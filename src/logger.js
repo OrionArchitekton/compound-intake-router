@@ -8,9 +8,10 @@ const DB_PATH = join(__dirname, '..', 'data', 'intakes.db');
 
 let db = null;
 
-export function initDb() {
-  mkdirSync(dirname(DB_PATH), { recursive: true });
-  db = new Database(DB_PATH);
+export function initDb(path = process.env.INTAKE_DB_PATH || DB_PATH) {
+  if (db?.open) db.close();
+  mkdirSync(dirname(path), { recursive: true });
+  db = new Database(path);
   db.pragma('journal_mode = WAL');
 
   db.exec(`
@@ -62,9 +63,8 @@ export function logIntake(record) {
   try {
     if (!db) initDb();
     db.prepare(INSERT).run(record);
-  } catch (err) {
-    console.error(`[logger] SQLite write failed: ${err.message}`);
-    console.error('[logger] Record dumped to stderr:', JSON.stringify(record));
+  } catch {
+    throw new Error('Audit write failed');
   }
 }
 

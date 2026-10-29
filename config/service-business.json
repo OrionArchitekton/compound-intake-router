@@ -1,0 +1,75 @@
+{
+  "description": "A small local service business handling quote requests and customer support",
+  "types": [
+    {
+      "id": "lead",
+      "description": "A new customer asking for a quote or appointment"
+    },
+    {
+      "id": "support",
+      "description": "An existing customer needs help"
+    },
+    {
+      "id": "partnership",
+      "description": "A supplier or business collaboration"
+    },
+    {
+      "id": "applicant",
+      "description": "A person applying for work"
+    },
+    {
+      "id": "spam",
+      "description": "Unsolicited bulk or irrelevant messages"
+    },
+    {
+      "id": "unknown",
+      "description": "Unclear message requiring manual review"
+    }
+  ],
+  "ventures": [
+    {
+      "id": "services",
+      "name": "Service enquiries",
+      "description": "New quotes and bookings"
+    },
+    {
+      "id": "customers",
+      "name": "Existing customers",
+      "description": "Help with an existing job"
+    },
+    {
+      "id": "general",
+      "name": "General",
+      "description": "Other enquiries or uncertain group"
+    }
+  ],
+  "routing": {
+    "routes": {
+      "lead": {
+        "services": "sales",
+        "default": "sales"
+      },
+      "support": {
+        "default": "customer-care"
+      },
+      "partnership": {
+        "default": "owner"
+      },
+      "applicant": {
+        "default": "hiring"
+      },
+      "spam": {
+        "action": "log-only"
+      },
+      "unknown": {
+        "default": "manual-review"
+      }
+    },
+    "fallbackChannel": "manual-review",
+    "urgencyPrefix": {
+      "high": "!!!",
+      "medium": ">>",
+      "low": "--"
+    }
+  }
+}
