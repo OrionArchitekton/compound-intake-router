@@ -1,3 +1,6 @@
+// Render fields as data; retain original structured/audit values separately.
+export const oneLine = value => String(value ?? '').replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g, ' ');
+
 function endpoint(value) {
   const url = new URL(value);
   const local = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
@@ -33,7 +36,7 @@ export const adapters = {
     await post('https://api.resend.com/emails', {
       from: env.ALERT_EMAIL_FROM,
       to: env.ALERT_EMAIL_TO.split(',').map(x => x.trim()).filter(Boolean),
-      subject: `Intake ${alert.classification.type}: ${alert.subject || '(no subject)'}`.replace(/[\r\n]/g, ' ').slice(0, 200),
+      subject: oneLine(`Intake ${alert.classification.type}: ${alert.subject || '(no subject)'}`).slice(0, 200),
       text: alert.text,
     }, { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Idempotency-Key': alert.id }, fetchFn);
   },

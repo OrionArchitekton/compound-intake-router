@@ -1,7 +1,5 @@
 import { loadConfig } from './config.js';
-import { deliver } from './delivery.js';
-
-const oneLine = value => String(value ?? '').replace(/[\r\n\u2028\u2029]+/g, ' ');
+import { deliver, oneLine } from './delivery.js';
 
 export function resolveDestination(classification, config = loadConfig()) {
   if (classification.type === 'spam') return null;
@@ -19,7 +17,7 @@ export async function route(normalized, classification, enrichment,
   if (destination === null) return { destination: '(log-only)', delivered: false, mode: 'filtered' };
   const mode = env.DELIVERY_MODE || 'console';
   const text = [
-    `[${classification.type.toUpperCase()}] ${classification.urgency.toUpperCase()} - ${classification.venture}`,
+    `[${oneLine(classification.type).toUpperCase()}] ${oneLine(classification.urgency).toUpperCase()} - ${oneLine(classification.venture)}`,
     `From: ${oneLine(normalized.sender.name)} <${oneLine(normalized.sender.email)}>`,
     `Subject: ${oneLine(normalized.subject) || '(no subject)'}`,
     `Reasoning: ${oneLine(classification.reasoning)}`, `Action: ${oneLine(classification.suggestedAction)}`,

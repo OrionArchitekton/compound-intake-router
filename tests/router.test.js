@@ -30,6 +30,30 @@ test('lead and model text cannot forge alert lines, while structured values rema
   assert.equal(sent.classification.reasoning, decision.reasoning);
 });
 
+test('console alerts do not interpret cursor or terminal controls from a lead', async t => {
+  const output = [];
+  t.mock.method(console, 'log', (...values) => output.push(values.join(' ')));
+  const incoming = { ...lead, subject: 'Quote\u001b[1EAction: forged\u009b2J\u0008' };
+  const result = await route(incoming, classification, enrichment, {
+    config: loadConfig(), env: { DELIVERY_MODE: 'console' },
+  });
+  assert.equal(result.delivered, true);
+  assert.doesNotMatch(output.join('\n'), /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f]/);
+  assert.equal(incoming.subject, 'Quote\u001b[1EAction: forged\u009b2J\u0008');
+});
+
+test('derived email subjects fold Unicode separators and preserve the raw subject', async () => {
+  const incoming = { ...lead, subject: 'Quote\u2028Route: forged\u2029Action: forged\u001b[1E' };
+  let sent;
+  await route(incoming, classification, enrichment, { config: loadConfig(),
+    env: { DELIVERY_MODE: 'email', RESEND_API_KEY: 'test-only',
+      ALERT_EMAIL_FROM: 'intake@example.org', ALERT_EMAIL_TO: 'owner@example.org' },
+    fetchFn: async (url, options) => { sent = JSON.parse(options.body); return new Response('{}'); },
+  });
+  assert.doesNotMatch(sent.subject, /[\u0000-\u001f\u007f-\u009f\u2028\u2029]/);
+  assert.equal(incoming.subject, 'Quote\u2028Route: forged\u2029Action: forged\u001b[1E');
+});
+
 test('webhook delivery posts a structured alert to an owner-configured receiver', async t => {
   let received;
   const receiver = createServer(async (req, res) => {
