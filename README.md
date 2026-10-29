@@ -81,4 +81,4 @@ Sender websites are never fetched. The API retains its domain/website fields for
 
 ## Development and license
 
-`npm test` uses Node's built-in test runner and no production credentials. Tests include HTTP-to-webhook-to-SQLite and failed-delivery/privacy cases. `npm run demo:live` retains the old five-request driver: it needs a running server and may incur API cost/send alerts; never treat it as an offline test. [MIT](LICENSE) is retained. See the [behavior spec](specs/service-business-intake-spec.md).
+`npm test` uses Node's built-in test runner and no production credentials. Tests include HTTP-to-webhook-to-SQLite and failed-delivery/privacy cases. `npm run demo:live` sends five examples to the running local server, loads `INTAKE_TOKEN` from `.env` or the environment and stops at the first HTTP failure without retrying. It may incur API cost/send alerts; never treat it as an offline test. [MIT](LICENSE) is retained. See the [behavior spec](specs/service-business-intake-spec.md).
