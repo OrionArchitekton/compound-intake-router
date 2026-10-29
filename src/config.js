@@ -16,5 +16,18 @@ export function loadConfig(path = process.env.INTAKE_CONFIG || new URL('../confi
       typeof config.routing.fallbackChannel !== 'string' || !config.routing.fallbackChannel) {
     throw new Error('Profile needs unknown, general and a fallback destination');
   }
+  if (Array.isArray(config.routing.routes) || typeof config.routing.routes !== 'object') {
+    throw new Error('Invalid routing rules');
+  }
+  for (const [type, entry] of Object.entries(config.routing.routes)) {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) throw new Error('Invalid routing entry');
+    for (const [group, value] of Object.entries(entry)) {
+      if (group === 'action') {
+        if (type !== 'spam' || value !== 'log-only') throw new Error('Only spam may bypass manual review');
+      } else if (typeof value !== 'string' || !value.trim()) {
+        throw new Error('Routing destinations must be non-empty text');
+      }
+    }
+  }
   return config;
 }
