@@ -1,5 +1,7 @@
 // Render fields as data; retain original structured/audit values separately.
-export const oneLine = value => String(value ?? '').replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g, ' ');
+export const oneLine = value => String(value ?? '').replace(
+  /[\u0000-\u001f\u007f-\u009f\u061c\u200e\u200f\u2028-\u202e\u2066-\u2069]+/g, ' ',
+);
 
 function endpoint(value) {
   const url = new URL(value);
