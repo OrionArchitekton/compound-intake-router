@@ -2,7 +2,7 @@
 
 ## Cursor Cloud specific instructions
 
-This is a single-service Node.js (ES Modules) Express application — no Docker, no external databases, no build step.
+This is a single-service Node.js (ES Modules) Express application with optional Docker packaging, embedded SQLite and no JavaScript build step.
 
 ### Services
 
@@ -15,7 +15,9 @@ This is a single-service Node.js (ES Modules) Express application — no Docker,
 - **Install deps:** `npm install`
 - **Start server:** `npm start` (runs `node src/server.js` on port 3747)
 - **Health check:** `curl http://localhost:3747/health`
-- **Demo (5 payloads):** `bash examples/send-all.sh`
+- **Offline demo:** `npm run demo` (fixed model fixture; no real sends or API calls)
+- **Live driver:** `npm run demo:live` (5 requests; requires explicit provider/send authority)
+- **Tests:** `npm test` (built-in Node runner)
 - **View audit log:** `npm run view-log`
 
 ### Environment
@@ -26,7 +28,7 @@ This is a single-service Node.js (ES Modules) Express application — no Docker,
 
 ### Gotchas
 
-- There is no lockfile in the repo; `npm install` generates `package-lock.json` locally.
-- No ESLint, Prettier, or test framework is configured in this project.
-- The `.env` file must exist before `npm start` — dotenv loads on import.
+- `package-lock.json` is tracked; use `npm ci` for reproducible installs.
+- No ESLint or Prettier configuration; tests use the built-in Node runner.
+- `.env` is optional; dotenv loads it when present. Non-local binding requires `INTAKE_TOKEN`. Sender websites are never fetched; a legacy `ENABLE_ENRICHMENT=true` setting refuses startup.
 - `better-sqlite3` compiles native bindings during `npm install`; ensure a C++ toolchain is available (`build-essential` on Ubuntu).

@@ -1,139 +1,84 @@
 # Compound Intake Router
 
-A webhook-driven pipeline that classifies, enriches, routes, and logs inbound messages across a venture studio.
+**Turn an inbound enquiry into a suggested next action for your small service business.**
 
-Built as an application project for [Compound Ventures](https://compoundventures.ai) — AI Systems Builder, Founding Team.
+Send a lead from a form or inbox automation to one HTTP endpoint. Claude suggests a message type, business group, urgency and next action. Your rules choose the destination; optional Slack, email or webhook alerts tell you to review it. SQLite keeps the intake and its outcome.
 
-## What It Does
+![Actual offline demo output; classification is a fictional fixture](docs/images/offline-demo.png)
 
-Send any inbound message to a single webhook. The system:
+This is a self-hosted service for a technically assisted buyer. It has no dashboard or inbox connector. AI suggestions need human review.
 
-1. **Normalizes** the payload into a consistent format and assigns it an `int_<hex>` id
-2. **Classifies** it with Claude (lead, partnership, support, applicant, spam, or unknown)
-3. **Assigns** it to the right venture (real estate, finance, hospitality, general)
-4. **Determines** urgency (high, medium, low)
-5. **Enriches** the sender by fetching their domain to detect a website and read its page title
-6. **Recommends** a next action
-7. **Routes** a formatted alert to the correct Slack channel (or the console); spam is logged only
-8. **Logs** a full audit row to SQLite
+## What it replaces and leaves out
 
-Steps 2 and 3 (type, urgency, venture, action) come from one Claude call. If any stage after normalization fails, the pipeline continues with degraded output instead of crashing.
+For the narrow job of classifying a lead and alerting a person, it can replace a dedicated Zapier or Make automation, or a HubSpot-style lead-routing rule.
 
-## Quick Start
+| Included | Left out compared with the paid platforms |
+|---|---|
+| One JSON endpoint and configurable classification | Form builders, inbox sync and app-connector marketplaces |
+| Business-group routes and one alert adapter | Drag-and-drop workflows, round-robin assignment and multi-step orchestration |
+| SQLite history | CRM contacts, sales pipelines, campaigns and reporting dashboards |
+| Optional shared inbound bearer token | Accounts, tenant isolation, user permissions and a full public API gateway |
 
-```bash
-git clone <repo-url> && cd compound-intake-router
-npm install
-cp .env.example .env    # add your ANTHROPIC_API_KEY
-npm start               # starts on :3747 (override with PORT)
-npm run demo            # send 5 sample payloads (alias for: bash examples/send-all.sh)
+There is **no durable delivery queue, automatic retry or duplicate-request protection**. A remote 2xx means acceptance, not that a person read an alert. Do not use this for emergency or guaranteed delivery.
+
+## Five-minute offline demo
+
+Requires Node.js 22+ and npm. Native SQLite may need a C++ build toolchain.
+
+```sh
+git clone https://github.com/OrionArchitekton/compound-intake-router.git
+cd compound-intake-router
+npm ci
+npm test
+npm run demo
 ```
 
-Requires Node.js 21+ for stable built-in fetch without experimental warnings (developed and tested on Node 24; Node 18+ is supported but may emit experimental warnings).
+The demo prints `OFFLINE SAMPLE`. It uses fictional input and a fixed model response, exercises parsing/routing and a temporary SQLite audit row, then removes that temporary database. No API key, enrichment requests or real alerts. It does not prove live Claude accuracy.
 
-## Example Output
+## Your first real enquiry
 
-Console delivery for the `lead.json` sample. The `Company` line is the page title fetched from the sender's domain during enrichment, not the sender's stated company — so its exact value depends on what `sunbeltcapital.com` returns at request time.
-
-```
-!!! [LEAD] HIGH — real-estate
-   From: Marcus Rivera <marcus@sunbeltcapital.com>
-   Company: <fetched page title of sunbeltcapital.com>
-   Subject: AI tools for multifamily deal analysis?
-   Reasoning: Sender runs a real estate fund seeking AI underwriting tools.
-   Action: Schedule discovery call within 24 hours
-   Route: #re-inbound
-```
-
-In Slack mode the same alert is delivered as Block Kit blocks (header, fields, reasoning, suggested action, and a context line with the route and spam score).
-
-## Architecture
-
-```
-POST /intake
-  → Normalizer (validate, extract fields, generate int_<hex> id)
-  → Classifier (one Claude call → type, venture, urgency, action, confidence, spam score)
-  → Enricher (HTTP GET the sender domain → website check + page title)
-  → Router (config-driven rules → Slack Block Kit or console; spam = log-only)
-  → Logger (SQLite audit row)
-  → Response (structured JSON with per-stage pipeline status)
-```
-
-Each stage after normalization is wrapped in error handling. If the classifier fails, the message is routed to `#intake-review` with `type: unknown`. If Slack delivery fails, it falls back to console. If the SQLite write fails, the record is dumped to stderr. No silent drops.
-
-## Configuration
-
-Environment variables (see `.env.example`):
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `ANTHROPIC_API_KEY` | — | Required. Read implicitly by the Anthropic SDK for the classifier call. |
-| `CLAUDE_MODEL` | `claude-sonnet-4-20250514` | Classifier model. |
-| `PORT` | `3747` | HTTP listen port. |
-| `DELIVERY_MODE` | `console` | `console` or `slack`. |
-| `SLACK_WEBHOOK_URL` | — | Required when `DELIVERY_MODE=slack`; otherwise delivery falls back to console. |
-
-Config files:
-
-- **Routing rules** — `config/routing.json`: maps classification type + venture to a Slack channel. Change routing without touching code.
-- **Ventures** — `config/ventures.json`: venture definitions fed to the classifier. Add a venture by adding an entry.
-
-## Design Decisions
-
-- **AI classifies. Rules route.** The LLM handles ambiguous judgment (what type is this? how urgent?). Routing is a deterministic config lookup. This keeps routing predictable and debuggable even when classification is imperfect.
-
-- **Every stage degrades gracefully.** A failed classifier routes to `#intake-review` as `unknown`; a failed Slack post falls back to console; a failed SQLite write dumps to stderr. No silent drops.
-
-- **Config over code.** Routing rules, venture definitions, and delivery mode are all configuration. The system adapts to new ventures or routing without code changes.
-
-- **One LLM call per message.** Classification runs in a single Claude call against the default `claude-sonnet-4-20250514` — no chains, no agents. Latency and cost depend on the model and message size (bodies are truncated to ~3,000 characters before sending).
-
-## API
-
-### POST /intake
-
-Send a JSON payload:
+Copy `.env.example` to `.env` and supply your own Anthropic key. Provider usage is billed separately. Start with `DELIVERY_MODE=console`. Set a private `INTAKE_TOKEN`; configure your caller to send `Authorization: Bearer <your token>`. Run `npm start` and POST JSON to `http://127.0.0.1:3747/intake`:
 
 ```json
 {
-  "sender": { "name": "...", "email": "...", "company": "..." },
-  "subject": "...",
-  "body": "...",
-  "source": "email"
+  "sender": { "name": "Example Customer", "email": "lead@example.com" },
+  "subject": "A repair quote",
+  "body": "Can you quote a small repair this week?",
+  "source": "contact-form"
 }
 ```
 
-Minimum required: `sender.email`, plus either `body` or `subject`. (The normalizer also accepts `email`/`from` and `body`/`message`/`text` aliases.)
+The response includes `id`, `classification`, `routing`, per-stage `pipeline` status and processing time. Invalid input returns 400; a missing/invalid configured token returns 401. Check `pipeline.log` and `routing.delivered`, not just HTTP 200. `npm run view-log` reads recent local audit rows. See the [Docker/Render guide and rollback runbook](docs/runbooks/deploy.md).
 
-On success, returns `200` with a structured result: `id`, `classification`, `enrichment`, `routing`, per-stage `pipeline` status, and `processingMs`.
+## Choose your categories
 
-On validation failure, returns `400` with:
+Edit `config/service-business.json` or point `INTAKE_CONFIG` at your JSON profile. Define message types, business groups, descriptions and deterministic route labels. Retain `unknown` and `general` as manual-review fallbacks; restart after changing a profile. Invalid model IDs always use the manual-review fallback. Unknown routes cannot override it, and spam routes must remain log-only.
 
-```json
-{ "status": "rejected", "errors": ["sender.email is required"], "processingMs": 1 }
-```
+For compatibility, the response and SQLite schema still call the business group `venture`. The original categories and rules are available in `config/venture-studio.json`. The old separate files remain examples; the selected combined profile controls the app.
 
-### GET /health
+## Pick one alert adapter
 
-Returns `status`, `uptime` (seconds), and the active `delivery` mode.
+| `DELIVERY_MODE` | Required settings | What success proves |
+|---|---|---|
+| `console` (default) | None | Alert text written to process stdout |
+| `slack` | `SLACK_WEBHOOK_URL` | Slack accepted a post to the incoming webhook's configured channel |
+| `email` | `RESEND_API_KEY`, `ALERT_EMAIL_FROM`, `ALERT_EMAIL_TO` | Resend accepted a plain-text email; verify your sender domain |
+| `webhook` | `ALERT_WEBHOOK_URL` | Your receiver accepted structured JSON |
 
-## Audit Log
+Email recipients may be comma-separated. A single selected adapter uses one physical destination (or email recipient list) for all route labels. Labels such as `sales` appear in the alert; they do not change Slack's channel or the email recipient. A webhook receiver can use them downstream. Transports plug into the small adapter map in `src/delivery.js`.
 
-Every intake is persisted to SQLite at `data/intakes.db` (WAL mode). The `intakes` table stores 21 columns, including the raw payload, raw classification, and per-stage pipeline status as JSON blobs alongside confidence and spam scores.
+Destinations are operator settings, never lead/model output. Remote URLs require HTTPS; loopback HTTP works for tests. Sends time out after five seconds and reject redirects. Failures stay `delivered: false`; there is no disguised console success or automatic resend.
 
-```bash
-npm run view-log    # pretty-print the 20 most recent records
-```
+## Privacy and limits
 
-## Operational Notes
+Accepted raw payloads and classification results persist in `data/intakes.db` by default; `INTAKE_DB_PATH` overrides that location (including the hosted disk path). Treat the DB, backups and console output as private customer data; the app does not encrypt them. Claude receives sender context, subject and about 3,000 body characters. [Anthropic's retention terms](https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data) apply. Alert providers also receive alert content.
 
-- **Enrichment makes a live outbound request.** For each accepted message, the enricher issues an HTTP GET to the sender domain with a 3-second timeout and a custom User-Agent. Since the target domain is derived from sender-supplied input, front this with appropriate egress controls and consider response size limits to prevent memory exhaustion (OOM) from large payloads.
-- **`/intake` is unauthenticated by design.** There is no auth on `POST /intake` or `GET /health`. For any non-local deployment, put it behind a gateway, shared secret, or signature check.
+Sender websites are never fetched. The API retains its domain/website fields for compatibility, with website enrichment always skipped. A legacy `ENABLE_ENRICHMENT=true` setting refuses startup; remove it before upgrading. Loopback is the default bind; non-local binding requires `INTAKE_TOKEN`. Add HTTPS, gateway rate/body limits, provider budget limits and monitoring before internet exposure. No built-in usage quota or customer billing.
 
-## Stack
+## Done-for-you setup
 
-Node.js (ESM), Express 5, the Anthropic SDK (`@anthropic-ai/sdk`), and `better-sqlite3`, with `dotenv` for config. The demo driver is a Bash script using `curl`. No web frameworks beyond Express, no UI, no auth.
+**$499 USD one-time**, approved for one business profile, one deployment, one inbound source connected by the buyer, one alert destination, a synthetic acceptance test and a 60-minute handoff. Hosting, API/email usage, provider accounts and ongoing support are separate. Availability and support terms must be finalized before sale. No checkout yet; see [SWAPMEET.md](SWAPMEET.md).
 
-## License
+## Development and license
 
-[MIT](LICENSE)
+`npm test` uses Node's built-in test runner and no production credentials. Tests include HTTP-to-webhook-to-SQLite and failed-delivery/privacy cases. `npm run demo:live` sends five examples to the running local server, loads `INTAKE_TOKEN` from `.env` or the environment and stops at the first HTTP failure without retrying. It may incur API cost/send alerts; never treat it as an offline test. [MIT](LICENSE) is retained. See the [behavior spec](specs/service-business-intake-spec.md).
