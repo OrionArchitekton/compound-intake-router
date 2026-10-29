@@ -75,9 +75,9 @@ Accepted raw payloads and classification results persist in `data/intakes.db`. T
 
 Sender websites are never fetched. The API retains its domain/website fields for compatibility, with website enrichment always skipped. A legacy `ENABLE_ENRICHMENT=true` setting refuses startup; remove it before upgrading. Loopback is the default bind; non-local binding requires `INTAKE_TOKEN`. Add HTTPS, gateway rate/body limits, provider budget limits and monitoring before internet exposure. No built-in usage quota or customer billing.
 
-## Done-for-you setup (proposal)
+## Done-for-you setup
 
-**Price TODO; suggested $499 USD one-time.** Proposed scope: one business profile, one deployment, one inbound source connected by the buyer, one alert destination, a synthetic acceptance test and a 60-minute handoff. Hosting, API/email usage, provider accounts and ongoing support are separate. Dan must approve scope, price and availability before sale. No checkout yet; see [SWAPMEET.md](SWAPMEET.md).
+**$499 USD one-time**, approved for one business profile, one deployment, one inbound source connected by the buyer, one alert destination, a synthetic acceptance test and a 60-minute handoff. Hosting, API/email usage, provider accounts and ongoing support are separate. Availability and support terms must be finalized before sale. No checkout yet; see [SWAPMEET.md](SWAPMEET.md).
 
 ## Development and license
 

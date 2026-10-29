@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { getRecent } from '../src/logger.js';
 
 const rows = getRecent(20);

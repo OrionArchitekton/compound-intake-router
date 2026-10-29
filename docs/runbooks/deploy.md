@@ -42,7 +42,7 @@ Check the HTTP response and matching SQLite row: classification/group and destin
 
 Watch health, failed/degraded stage counts, disk capacity and provider spend. Use `npm run view-log` privately; audit rows contain raw lead data. Console alerts also contain customer details. Do not publish DB exports or unrestricted logs. Keep inbound tokens and provider credentials in the hosting secret settings, not URLs, commits or screenshots.
 
-The pipeline never fetches sender-controlled websites. The old fetching helper is removed, and enrichment fields remain skipped for response compatibility. Use TLS and body/rate limits at the edge. There is no durable queue, replay/idempotency protection, quota or multi-tenant isolation. A timed-out send may already have reached the provider: inspect immutable evidence before any manual retry. Never replay the entire intake automatically, because that may duplicate both alerts and rows.
+The pipeline never fetches sender-controlled websites. The old fetching helper is removed, and enrichment fields remain skipped for response compatibility. Use TLS and body/rate limits at the edge. Set `INTAKE_TOKEN` before exposing any reverse proxy, tunnel or port forward, including a proxy to a loopback listener; loopback binding alone does not authenticate callers. There is no durable queue, replay/idempotency protection, quota or multi-tenant isolation. A timed-out send may already have reached the provider: inspect immutable evidence before any manual retry. Never replay the entire intake automatically, because that may duplicate both alerts and rows.
 
 ## Backup and rollback
 

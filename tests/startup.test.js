@@ -2,9 +2,25 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { once } from 'node:events';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+
+test('the log viewer reads the database path from the local dotenv file', () => {
+  const folder = mkdtempSync(join(tmpdir(), 'intake-viewer-'));
+  try {
+    const dbPath = join(folder, 'configured.db');
+    writeFileSync(join(folder, '.env'), `INTAKE_DB_PATH=${dbPath}\n`);
+    const env = { ...process.env };
+    delete env.INTAKE_DB_PATH;
+    const result = spawnSync(process.execPath, [new URL('../scripts/view-log.js', import.meta.url).pathname], {
+      cwd: folder, env, encoding: 'utf8', timeout: 3000,
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(existsSync(dbPath), true, 'must open the same configured database as the server');
+    assert.equal(existsSync(join(folder, 'data', 'intakes.db')), false);
+  } finally { rmSync(folder, { recursive: true, force: true }); }
+});
 
 test('the deployed entrypoint refuses network exposure without an inbound token', () => {
   const result = spawnSync(process.execPath, ['src/server.js'], {

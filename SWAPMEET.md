@@ -1,10 +1,10 @@
 # Swap Meet listing draft
 
-Status: proposal for Dan and Lucas; not submitted.
+Status: draft for Lucas; Dan approved the $499 setup price. Not submitted.
 
 - **Title:** Small-business lead triage, set up for you
 - **One-liner:** Sort inbound enquiries with Claude, apply your routing rules and send an optional Slack, email or webhook alert.
-- **Suggested price text:** TODO: Dan to decide. Proposal: **$499 USD one-time setup**, provider/hosting usage extra.
+- **Price text:** **$499 USD one-time setup**, provider/hosting usage extra.
 - **Checkout link:** TODO: Dan to supply an approved public HTTPS Stripe Payment Link, Gumroad or Lemon Squeezy checkout. No link created.
 - **Apps replaced (narrow workflow):** Zapier, Make, HubSpot-style lead routing.
 - **Problem solved:** Get a new enquiry to a human with a suggested next action and audit trail.
