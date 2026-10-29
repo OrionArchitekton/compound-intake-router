@@ -11,7 +11,7 @@ The app is intended for a single business. This guide prepares a deployment; no 
 
 ## Local Docker rollout
 
-Copy `.env.example` to `.env`. Supply your Anthropic key locally and set a private `INTAKE_TOKEN`; do not commit it. Keep enrichment off and console delivery selected during setup. Docker binds internally on all interfaces, while Compose publishes only loopback. Compose refuses a missing/empty inbound token.
+Copy `.env.example` to `.env`. Supply your Anthropic key locally and set a private `INTAKE_TOKEN`; do not commit it. Keep console delivery selected during setup. Sender website fetching is not included; remove a legacy `ENABLE_ENRICHMENT=true` setting because it now refuses startup. Docker binds internally on all interfaces, while Compose publishes only loopback. Compose refuses a missing/empty inbound token.
 
 ```sh
 docker compose up --build -d
@@ -26,7 +26,7 @@ The `intake-data` named volume stores `/app/data/intakes.db` and its WAL/SHM fil
 
 Follow [Render's Express guide](https://render.com/docs/deploy-node-express-app). Create a service from your approved repository/branch. Use Node.js 22, build command `npm ci`, start command `npm start`, health path `/health`, and manual deploys during review.
 
-Set `HOST=0.0.0.0`, a private `INTAKE_TOKEN`, the buyer's `ANTHROPIC_API_KEY`, `INTAKE_CONFIG=config/service-business.json`, `ENABLE_ENRICHMENT=false` and the selected delivery settings. The server refuses a non-local bind without the token. Configure provider budgets and gateway rate limits; a token alone does not cap cost. Hosting/API/email charges are separate and require the buyer's approval.
+Set `HOST=0.0.0.0`, a private `INTAKE_TOKEN`, the buyer's `ANTHROPIC_API_KEY`, `INTAKE_CONFIG=config/service-business.json`, the selected delivery settings. The server refuses a non-local bind without the token. Configure provider budgets and gateway rate limits; a token alone does not cap cost. Hosting/API/email charges are separate and require the buyer's approval.
 
 Attach a paid [persistent disk](https://render.com/docs/disks) at `/var/data` and set `INTAKE_DB_PATH=/var/data/intakes.db`. Without a disk, audit records are lost on redeploy. Use one instance; disk-backed services have deployment downtime. Verify that the service can create a test audit row on the mounted path before accepting customer data. Do not claim a live hosted deployment from this source-only validation.
 
@@ -42,7 +42,7 @@ Check the HTTP response and matching SQLite row: classification/group and destin
 
 Watch health, failed/degraded stage counts, disk capacity and provider spend. Use `npm run view-log` privately; audit rows contain raw lead data. Console alerts also contain customer details. Do not publish DB exports or unrestricted logs. Keep inbound tokens and provider credentials in the hosting secret settings, not URLs, commits or screenshots.
 
-Enrichment follows untrusted domains/redirects and is off by default; do not enable it without network egress restrictions. Use TLS and body/rate limits at the edge. There is no durable queue, replay/idempotency protection, quota or multi-tenant isolation. A timed-out send may already have reached the provider: inspect immutable evidence before any manual retry. Never replay the entire intake automatically, because that may duplicate both alerts and rows.
+The pipeline never fetches sender-controlled websites. The old fetching helper is removed, and enrichment fields remain skipped for response compatibility. Use TLS and body/rate limits at the edge. There is no durable queue, replay/idempotency protection, quota or multi-tenant isolation. A timed-out send may already have reached the provider: inspect immutable evidence before any manual retry. Never replay the entire intake automatically, because that may duplicate both alerts and rows.
 
 ## Backup and rollback
 

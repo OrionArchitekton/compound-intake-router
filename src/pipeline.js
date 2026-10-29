@@ -1,6 +1,5 @@
 import { normalize } from './normalizer.js';
 import { classify } from './classifier.js';
-import { enrich } from './enricher.js';
 import { route } from './router.js';
 import { logIntake } from './logger.js';
 import { timer } from './utils.js';
@@ -18,7 +17,6 @@ async function runStage(name, fn) {
 
 export async function processIntake(rawPayload, {
   config = loadConfig(), classifyFn = classify, routeFn = route, logFn = logIntake,
-  enrichEnabled = process.env.ENABLE_ENRICHMENT === 'true',
 } = {}) {
   const elapsed = timer();
 
@@ -52,14 +50,9 @@ export async function processIntake(rawPayload, {
     };
   }
 
-  // 3. Enrich
-  const enrichResult = enrichEnabled
-    ? await runStage('enrich', () => enrich(payload.sender))
-    : { status: 'skipped', result: { domain: payload.sender.domain, hasWebsite: false, pageTitle: null } };
-  pipeline.enrich = enrichResult.result?.status === 'failed' ? 'failed' : enrichResult.status;
-  const enrichment = enrichResult.result || {
-    domain: payload.sender.domain, hasWebsite: false, pageTitle: null, status: 'failed',
-  };
+  // Preserve response fields without following any sender-controlled domain.
+  pipeline.enrich = 'skipped';
+  const enrichment = { domain: payload.sender.domain, hasWebsite: false, pageTitle: null };
 
   // 4. Route
   const routeResult = await runStage('route', () => routeFn(payload, classification, enrichment, { config }));

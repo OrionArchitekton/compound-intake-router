@@ -17,3 +17,17 @@ test('a profile cannot disable or corrupt the manual-review fallback', () => {
     }
   } finally { rmSync(folder, { recursive: true, force: true }); }
 });
+
+test('reserved review and spam routes cannot be reassigned', () => {
+  const folder = mkdtempSync(join(tmpdir(), 'intake-profile-'));
+  const path = join(folder, 'profile.json');
+  try {
+    for (const [type, entry] of [['unknown', { default: 'sales' }],
+      ['spam', { default: 'sales' }], ['spam', { action: 'log-only', default: 'sales' }]]) {
+      const config = loadConfig();
+      config.routing.routes[type] = entry;
+      writeFileSync(path, JSON.stringify(config));
+      assert.throws(() => loadConfig(path), /review|spam/i);
+    }
+  } finally { rmSync(folder, { recursive: true, force: true }); }
+});

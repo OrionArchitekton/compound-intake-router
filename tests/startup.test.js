@@ -15,11 +15,20 @@ test('the deployed entrypoint refuses network exposure without an inbound token'
   assert.match(result.stderr, /INTAKE_TOKEN/);
 });
 
+test('a legacy website-fetching setting fails closed at startup', () => {
+  const result = spawnSync(process.execPath, ['src/server.js'], {
+    env: { ...process.env, ENABLE_ENRICHMENT: 'true' }, timeout: 1500, encoding: 'utf8',
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Website enrichment is not included/);
+});
+
 test('the actual server entrypoint serves health and protects intake', { timeout: 10000 }, async () => {
   const folder = mkdtempSync(join(tmpdir(), 'intake-startup-'));
   const child = spawn(process.execPath, ['src/server.js'], {
     env: { ...process.env, HOST: '127.0.0.1', PORT: '0', INTAKE_TOKEN: 'test-only',
-      INTAKE_DB_PATH: join(folder, 'test.db'), DELIVERY_MODE: 'console' }, stdio: ['ignore', 'pipe', 'pipe'],
+      INTAKE_DB_PATH: join(folder, 'test.db'), DELIVERY_MODE: 'console', ENABLE_ENRICHMENT: 'false' },
+    stdio: ['ignore', 'pipe', 'pipe'],
   });
   const exited = once(child, 'exit');
   try {

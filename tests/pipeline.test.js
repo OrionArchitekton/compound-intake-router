@@ -54,6 +54,19 @@ test('an authorized HTTP lead reaches a webhook and a matching SQLite audit row'
   assert.equal(JSON.parse(rows[0].pipeline_status).route, 'ok');
 });
 
+test('lead triage never fetches a sender-supplied website', async t => {
+  let fetches = 0;
+  t.mock.method(globalThis, 'fetch', async () => { fetches++; throw new Error('Unexpected outbound request'); });
+  const result = await processIntake({ email: 'lead@example.com', body: 'Hello' }, {
+    config: loadConfig(), enrichEnabled: true,
+    classifyFn: async () => ({ type: 'lead', venture: 'services', urgency: 'high' }),
+    routeFn: async () => ({ destination: 'sales', delivered: true, mode: 'console' }),
+    logFn: () => {},
+  });
+  assert.equal(fetches, 0);
+  assert.equal(result.pipeline.enrich, 'skipped');
+});
+
 test('classifier failure goes to manual review and failed alert/audit statuses remain visible', async t => {
   t.mock.method(console, 'error', () => {});
   let record;

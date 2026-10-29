@@ -8,10 +8,10 @@ Status: proposal for Dan and Lucas; not submitted.
 - **Checkout link:** TODO: Dan to supply an approved public HTTPS Stripe Payment Link, Gumroad or Lemon Squeezy checkout. No link created.
 - **Apps replaced (narrow workflow):** Zapier, Make, HubSpot-style lead routing.
 - **Problem solved:** Get a new enquiry to a human with a suggested next action and audit trail.
-- **Features left out:** CRM, inbox/form connectors, workflow builder, campaigns, queue, automatic retry, replay protection, round-robin assignment, multi-user permissions and billing. Route names are labels; one physical alert destination per selected adapter.
+- **Features left out:** CRM, website enrichment, inbox/form connectors, workflow builder, campaigns, queue, automatic retry, replay protection, round-robin assignment, multi-user permissions and billing. Route names are labels; one physical alert destination per selected adapter.
 - **Setup scope:** One profile, deployment, buyer-connected inbound source and alert destination; synthetic acceptance test and 60-minute handoff. No unlimited integration work or ongoing support.
 - **Requirements:** Node.js 22+ or Docker; buyer's Anthropic account; optional Resend/Slack/receiver; persistent storage/backups. Provider usage and hosting paid separately.
-- **Privacy:** Raw inputs persist in SQLite. Model/selected alert providers receive content; enrichment defaults off.
+- **Privacy:** Raw inputs persist in SQLite. Model/selected alert providers receive content; sender websites are never fetched.
 - **Screenshot:** [Actual offline output](docs/images/offline-demo.png). `npm run demo` uses a fictional model fixture, not live AI.
 - **License:** Existing MIT retained.
 

@@ -29,5 +29,14 @@ export function loadConfig(path = process.env.INTAKE_CONFIG || new URL('../confi
       }
     }
   }
+  const review = config.routing.routes.unknown || {};
+  if (Object.values(review).some(value => value !== config.routing.fallbackChannel)) {
+    throw new Error('Unknown messages must use the manual review fallback');
+  }
+  const spam = config.routing.routes.spam;
+  if (config.types.some(type => type.id === 'spam') &&
+      (!spam || spam.action !== 'log-only' || Object.keys(spam).length !== 1)) {
+    throw new Error('Spam must remain log-only');
+  }
   return config;
 }

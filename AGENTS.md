@@ -30,5 +30,5 @@ This is a single-service Node.js (ES Modules) Express application with optional 
 
 - `package-lock.json` is tracked; use `npm ci` for reproducible installs.
 - No ESLint or Prettier configuration; tests use the built-in Node runner.
-- `.env` is optional; dotenv loads it when present. Non-local binding requires `INTAKE_TOKEN`.
+- `.env` is optional; dotenv loads it when present. Non-local binding requires `INTAKE_TOKEN`. Sender websites are never fetched; a legacy `ENABLE_ENRICHMENT=true` setting refuses startup.
 - `better-sqlite3` compiles native bindings during `npm install`; ensure a C++ toolchain is available (`build-essential` on Ubuntu).

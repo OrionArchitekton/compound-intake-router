@@ -37,7 +37,7 @@ The demo prints `OFFLINE SAMPLE`. It uses fictional input and a fixed model resp
 
 ## Your first real enquiry
 
-Copy `.env.example` to `.env` and supply your own Anthropic key. Provider usage is billed separately. Start with `DELIVERY_MODE=console` and `ENABLE_ENRICHMENT=false`. Set a private `INTAKE_TOKEN`; configure your caller to send `Authorization: Bearer <your token>`. Run `npm start` and POST JSON to `http://127.0.0.1:3747/intake`:
+Copy `.env.example` to `.env` and supply your own Anthropic key. Provider usage is billed separately. Start with `DELIVERY_MODE=console`. Set a private `INTAKE_TOKEN`; configure your caller to send `Authorization: Bearer <your token>`. Run `npm start` and POST JSON to `http://127.0.0.1:3747/intake`:
 
 ```json
 {
@@ -52,7 +52,7 @@ The response includes `id`, `classification`, `routing`, per-stage `pipeline` st
 
 ## Choose your categories
 
-Edit `config/service-business.json` or point `INTAKE_CONFIG` at your JSON profile. Define message types, business groups, descriptions and deterministic route labels. Retain `unknown` and `general` as manual-review fallbacks; restart after changing a profile. Invalid model IDs go to manual review. Spam is logged without alert delivery.
+Edit `config/service-business.json` or point `INTAKE_CONFIG` at your JSON profile. Define message types, business groups, descriptions and deterministic route labels. Retain `unknown` and `general` as manual-review fallbacks; restart after changing a profile. Invalid model IDs always use the manual-review fallback. Unknown routes cannot override it, and spam routes must remain log-only.
 
 For compatibility, the response and SQLite schema still call the business group `venture`. The original categories and rules are available in `config/venture-studio.json`. The old separate files remain examples; the selected combined profile controls the app.
 
@@ -73,7 +73,7 @@ Destinations are operator settings, never lead/model output. Remote URLs require
 
 Accepted raw payloads and classification results persist in `data/intakes.db`. Treat the DB, backups and console output as private customer data; the app does not encrypt them. Claude receives sender context, subject and about 3,000 body characters. [Anthropic's retention terms](https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data) apply. Alert providers also receive alert content.
 
-Website enrichment is off by default. Enabling it fetches a sender-supplied domain and follows redirects; appropriate network egress restrictions are required. Keep it off for ordinary hosted setups. Loopback is the default bind; non-local binding requires `INTAKE_TOKEN`. Add HTTPS, gateway rate/body limits, provider budget limits and monitoring before internet exposure. No built-in usage quota or customer billing.
+Sender websites are never fetched. The API retains its domain/website fields for compatibility, with website enrichment always skipped. A legacy `ENABLE_ENRICHMENT=true` setting refuses startup; remove it before upgrading. Loopback is the default bind; non-local binding requires `INTAKE_TOKEN`. Add HTTPS, gateway rate/body limits, provider budget limits and monitoring before internet exposure. No built-in usage quota or customer billing.
 
 ## Done-for-you setup (proposal)
 

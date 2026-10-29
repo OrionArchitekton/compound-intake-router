@@ -7,7 +7,7 @@
 3. A caller submits a lead through the HTTP API and receives its classification, route and stage status, with the same result persisted in SQLite. Invalid input returns 400; unexpected faults return a generic 500 without input, endpoint URLs or credentials in logs. An optional inbound bearer token protects `/intake`; loopback is the default bind. The supplied hosted path requires the token.
 4. An owner can run a synthetic offline demo without an API key, paid API requests, enrichment fetches or real alert delivery. The demo is a separate script; the live endpoint has no unauthenticated demo bypass.
 
-The application stores inbound content in SQLite; it is not a no-storage service. There is no queue, automatic retry, replay protection, CRM, inbox synchronization or multi-tenant boundary. Website enrichment is opt-in, and must be kept off unless an operator provides appropriate egress controls.
+The application stores inbound content in SQLite; it is not a no-storage service. There is no queue, automatic retry, replay protection, CRM, inbox synchronization or multi-tenant boundary. Sender websites are never fetched. Website enrichment fields remain skipped for compatibility, and the legacy opt-in startup setting is rejected.
 
 ## Test seams
 

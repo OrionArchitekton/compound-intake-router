@@ -2,6 +2,8 @@ import { loadConfig } from './config.js';
 import { deliver } from './delivery.js';
 
 export function resolveDestination(classification, config = loadConfig()) {
+  if (classification.type === 'spam') return null;
+  if (classification.type === 'unknown') return config.routing.fallbackChannel;
   const routes = config.routing.routes;
   const entry = Object.hasOwn(routes, classification.type) ? routes[classification.type] : null;
   if (entry?.action === 'log-only') return null;
